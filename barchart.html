@@ -50,6 +50,10 @@ var xAxis = d3.axisBottom()
 var yAxis = d3.axisLeft()
     .scale(y)
     .tickFormat(d3.format(".2s"));
+
+var y1Axis = d3.axisLeft()
+    .scale(y1)
+    .tickFormat(d3.format(".2s")); 
  
 var color = d3.scaleOrdinal().range(
     ["#fbb4ae", "#b3cde3"]);
@@ -102,7 +106,7 @@ console.log(data)
     return d.total; 
   })]);
 
-  y1.domain([0,200]);
+  y1.domain([0,160]);
  
   svg.append("g")
       .attr("class", "x axis")
@@ -114,6 +118,8 @@ console.log(data)
 .style("text-anchor", "end");
 
  
+if (chart_type == 'grouped'){ 
+
   svg.append("g")
       .attr("class", "y axis")
       .call(yAxis)
@@ -124,16 +130,17 @@ console.log(data)
       .style("text-anchor", "end")
       .text("");
 
-if (chart_type == 'grouped'){ 
   var grouped_barchart = svg.selectAll(".grouped_barchart")
-      .data(data)
+    .data(data)
     .enter().append("g")
-      .attr("class", "g")
+   .attr("class", "g")
       .attr("transform", function(d) { return "translate(" + x0(d.year) + ",0)"; });
  
   grouped_barchart.selectAll("rect")
       .data(function(d) { return d.columnDetails; })
     .enter().append("rect")
+    .transition()
+  .duration(1000)
       .attr("width", x1.bandwidth())
       .attr("x", function(d) { 
         return x1(d.column);
@@ -146,10 +153,22 @@ if (chart_type == 'grouped'){
       })
       .style("fill", function(d) {
           return color(d.name);
-      });
+      })
+	grouped_barchart.exit().remove()
 }
 
 else{
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(y1Axis)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".7em")
+      .style("text-anchor", "end")
+      .text("");
+
 console.log(y1)
 
   var stacked_barchart = svg.append("g")
@@ -165,6 +184,8 @@ console.log(y1)
       // enter a second time = loop subgroup per subgroup to add all rectangles
       .data(function(d) { return d})
       .enter().append("rect")
+.transition()
+  .duration(1000)
         .attr("x", function(d) { return x0(d.data.year); })
         .attr("y", function(d) { return y1(d[1]); })
         .attr("height", function(d) { return y1(d[0]) - y1(d[1]); })
