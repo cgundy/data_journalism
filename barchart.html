@@ -25,6 +25,9 @@ body {
 <body>
 <script src="https://d3js.org/d3.v5.min.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+<button onclick="update('grouped')">Grouped</button>
+<button onclick="update('stacked')">Stacked</button>
+
 <script>
 var margin = {top: 20, right: 20, bottom: 30, left: 40},
     width = 960 - margin.left - margin.right,
@@ -36,6 +39,10 @@ var x1 = d3.scaleBand();
  
 var y = d3.scaleLinear()
     .range([height, 0]);
+
+var y1 = d3.scaleLinear()
+    .range([height, 0]);
+ 
  
 var xAxis = d3.axisBottom()
     .scale(x0);
@@ -45,7 +52,7 @@ var yAxis = d3.axisLeft()
     .tickFormat(d3.format(".2s"));
  
 var color = d3.scaleOrdinal().range(
-    ["#fbb4ae", "#b3cde3", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+    ["#fbb4ae", "#b3cde3"]);
  
 var svg = d3.select("body").append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -60,7 +67,7 @@ var innerColumns = {
   "column2" : ["fail"],
 }
  
-d3.csv("data/barchart.csv").then(
+function update(chart_type){d3.csv("data/barchart.csv").then(
     function(data) {
   var columnHeaders = d3.keys(data[0]).filter(function(key) { return key !== "year"; });
 console.log(data)
@@ -83,13 +90,19 @@ console.log(data)
       return d.yEnd; 
     });
   });
- 
+
+ var stackedData = d3.stack()
+    .keys(['pass','fail'])
+    (data);
+
   x0.domain(data.map(function(d) { return d.year; }));
   x1.domain(d3.keys(innerColumns)).range([0, x0.bandwidth()]).padding([0.05]);
  
   y.domain([0, d3.max(data, function(d) { 
     return d.total; 
   })]);
+
+  y1.domain([0,200]);
  
   svg.append("g")
       .attr("class", "x axis")
@@ -110,14 +123,15 @@ console.log(data)
       .attr("dy", ".7em")
       .style("text-anchor", "end")
       .text("");
- 
-  var project_stackedbar = svg.selectAll(".project_stackedbar")
+
+if (chart_type == 'grouped'){ 
+  var grouped_barchart = svg.selectAll(".grouped_barchart")
       .data(data)
     .enter().append("g")
       .attr("class", "g")
       .attr("transform", function(d) { return "translate(" + x0(d.year) + ",0)"; });
  
-  project_stackedbar.selectAll("rect")
+  grouped_barchart.selectAll("rect")
       .data(function(d) { return d.columnDetails; })
     .enter().append("rect")
       .attr("width", x1.bandwidth())
@@ -133,7 +147,30 @@ console.log(data)
       .style("fill", function(d) {
           return color(d.name);
       });
- 
+}
+
+else{
+console.log(y1)
+
+  var stacked_barchart = svg.append("g")
+    .selectAll("g")
+    // Enter in the stack data = loop key per key = group per group
+    .data(stackedData)
+    .enter().append("g")
+.attr("fill", function(d) { return color(d.key); })
+   //   .attr("transform", function(d) { return "translate(" + y(d.value) + ",0)"; });
+
+	stacked_barchart
+      .selectAll("rect")
+      // enter a second time = loop subgroup per subgroup to add all rectangles
+      .data(function(d) { return d})
+      .enter().append("rect")
+        .attr("x", function(d) { return x0(d.data.year); })
+        .attr("y", function(d) { return y1(d[1]); })
+        .attr("height", function(d) { return y1(d[0]) - y1(d[1]); })
+        .attr("width",x1.bandwidth())
+}   
+
   var legend = svg.selectAll(".legend")
       .data(columnHeaders.slice().reverse())
     .enter().append("g")
@@ -154,5 +191,6 @@ console.log(data)
       .text(function(d) { return d; });
  
 });
+}
  
 </script>
