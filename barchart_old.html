@@ -26,15 +26,26 @@ var svg = d3.select("#barchart")
     .attr("transform",
           "translate(" + margin.left + "," + margin.top + ")");
 
+
 // Parse the Data
-d3.csv("data/barchart.csv", function(data) {
-	
-	console.log(data.YEAR)
+d3.csv("data/barchart.csv")
+
+//console.log(data)
+
+//return {
+//    year : data.year,
+//    pass : data.pass,
+//    fail : data.fail,
+//  };
+//}
+.then(function(data) {
+  console.log(data);
+
   // List of subgroups = header of the csv files = soil condition here
   var subgroups = data.columns.slice(1)
 
   // List of groups = species here = value of the first column called group -> I show them on the X axis
-  var groups = d3.map(data, function(d){return(d.YEAR)}).keys()
+  var groups = d3.map(data, function(d){return(d.year)}).keys()
 
   // Add X axis
   var x = d3.scaleBand()
@@ -62,6 +73,9 @@ d3.csv("data/barchart.csv", function(data) {
     .keys(subgroups)
     (data)
 
+console.log(groups)
+console.log(subgroups)
+console.log(stackedData)
 
   // ----------------
   // Highlight a specific subgroup when hovered
