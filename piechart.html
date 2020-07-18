@@ -97,7 +97,6 @@ v = svg.selectAll("mylabels")
 // Now add the annotation. Use the centroid method to get the best coordinates
 	var v = svg.selectAll('mySlices')
 	  .data(data_ready);
-
 	v.enter()
 	  .append('text')
 	  .transition()
@@ -108,9 +107,9 @@ v = svg.selectAll("mylabels")
 	  .style("font-size", 17)
 
     // remove the group that is not present anymore
-     u
-      .exit().remove();
-	  svg.selectAll("mylabels").remove();
+     u.exit().remove();
+//	  svg.selectAll("mylabels").exit().remove();
+//	svg.selectAll("mydots").exit().remove();
 //	 v
 //    .exit().remove();
 

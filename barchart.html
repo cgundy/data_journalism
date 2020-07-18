@@ -71,7 +71,12 @@ var innerColumns = {
   "column2" : ["fail"],
 }
  
-function update(chart_type){d3.csv("data/barchart.csv").then(
+function update(chart_type){
+
+svg.selectAll('rect').remove()
+svg.selectAll('g.y.axis').remove()
+
+d3.csv("data/barchart.csv").then(
     function(data) {
   var columnHeaders = d3.keys(data[0]).filter(function(key) { return key !== "year"; });
 console.log(data)
@@ -113,8 +118,9 @@ console.log(data)
       .attr("transform", "translate(0," + height + ")")
 	.call(xAxis)
     .selectAll("text")
+.attr("y", -4)
       .attr("transform", "rotate(-90)")
-.attr("dx", "-.7em")
+.attr("dx", "-0.8em")
 .style("text-anchor", "end");
 
  
@@ -135,12 +141,16 @@ if (chart_type == 'grouped'){
     .enter().append("g")
    .attr("class", "g")
       .attr("transform", function(d) { return "translate(" + x0(d.year) + ",0)"; });
+
+	console.log(data)
  
   grouped_barchart.selectAll("rect")
       .data(function(d) { return d.columnDetails; })
     .enter().append("rect")
+	.attr("y", 500)
     .transition()
-  .duration(1000)
+	.delay(function(d,i){return d.yEnd * 10})
+  //.duration(1000)
       .attr("width", x1.bandwidth())
       .attr("x", function(d) { 
         return x1(d.column);
@@ -154,7 +164,8 @@ if (chart_type == 'grouped'){
       .style("fill", function(d) {
           return color(d.name);
       })
-	grouped_barchart.exit().remove()
+
+//	grouped_barchart.selectAll("rect").exit().transition().duration(1000).attr("height",0).remove()
 }
 
 else{
@@ -169,8 +180,6 @@ else{
       .style("text-anchor", "end")
       .text("");
 
-console.log(y1)
-
   var stacked_barchart = svg.append("g")
     .selectAll("g")
     // Enter in the stack data = loop key per key = group per group
@@ -180,16 +189,19 @@ console.log(y1)
    //   .attr("transform", function(d) { return "translate(" + y(d.value) + ",0)"; });
 
 	stacked_barchart
-      .selectAll("rect")
-      // enter a second time = loop subgroup per subgroup to add all rectangles
+      .selectAll(".stacked_barchart")
+  // enter a second time = loop subgroup per subgroup to add all rectangles
       .data(function(d) { return d})
-      .enter().append("rect")
-.transition()
-  .duration(1000)
+	 .enter().append("rect")
+	.attr("y", 500)
+	.attr("x", function(d) { return x0(d.data.year); })
+    .transition()
+  .delay(function(d,i){return i * 20})
         .attr("x", function(d) { return x0(d.data.year); })
         .attr("y", function(d) { return y1(d[1]); })
         .attr("height", function(d) { return y1(d[0]) - y1(d[1]); })
-        .attr("width",x1.bandwidth())
+        .attr("width",x1.bandwidth());
+
 }   
 
   var legend = svg.selectAll(".legend")
@@ -198,10 +210,10 @@ console.log(y1)
       .attr("class", "legend")
       .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
  
-  legend.append("rect")
-      .attr("x", width - 18)
-      .attr("width", 18)
-      .attr("height", 18)
+  legend.append("circle")
+      .attr("cx", width - 14)
+      .attr("cy", 9)
+      .attr("r", 7)
       .style("fill", color);
  
   legend.append("text")
