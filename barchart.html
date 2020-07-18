@@ -28,6 +28,7 @@ body {
 <button onclick="update('grouped')">Grouped</button>
 <button onclick="update('stacked')">Stacked</button>
 
+<div id="barchart"></div>
 
 <script>
 var margin = {top: 20, right: 20, bottom: 30, left: 40},
@@ -77,6 +78,7 @@ function update(chart_type){
 svg.selectAll('rect').remove()
 svg.selectAll('g.y.axis').remove()
 svg.selectAll('g.x.axis').remove()
+d3.selectAll('g.tooltip').remove()
 
 d3.csv("data/barchart.csv").then(
     function(data) {
@@ -129,22 +131,45 @@ console.log(data)
   // Highlight a specific subgroup when hovered
   // ----------------
 
+var tooltip = d3.select("body")
+    .append("g")
+    .style("opacity", 0)
+    .attr("class", "tooltip")
+    .style("background-color", "white")
+    .style("border", "solid")
+    .style("border-width", "1px")
+	.style("left", "70px")
+	.style("top", "40px")
+	.style("position", "absolute")
+	.style("width", "40px")
+    .style("border-radius", "5px")
+    .style("padding", "10px")
+
   // What happens when user hover a bar
   var mouseover = function(d) {
-    // what subgroup are we hovering?
 	if (chart_type == 'stacked'){
 	var subgroupName = d3.select(this.parentNode).datum().key; // This was the tricky part
 	var subgroupValue = d.data[subgroupName];
 	}
 	else{
-	var subgroupName = d3.select(this).datum().key}
-    var subgroupValue = d.key;
+	var subgroupName = d3.select(this).datum().key
+    var subgroupValue = d.value;}
     // Reduce opacity of all rect to 0.2
     d3.selectAll("myRect").style("opacity", 0.2)
     // Highlight all rects of this subgroup with opacity 0.8. It is possible to select them since they have a specific class = their name.
-    d3.selectAll("."+subgroupName)
-      .style("opacity", 1.5)
+	//console.log(d)
+    d3.selectAll("."+subgroupName + subgroupValue).style("opacity", 1)
+tooltip
+        .html(subgroupName + "<br>" + "Count: " + subgroupValue)
+        .style("opacity", 1)
     }
+
+var mousemove = function(d) {
+	console.log(d3.mouse(this.parentNode))
+    tooltip
+      .style("left", (d3.mouse(this)[0]+90) + "px") // It is important to put the +90: other wise the tooltip is exactly where the point is an it creates a weird effect
+     .style("top", (d3.mouse(this)[1]) + "px")
+  }
 
   // When user do not hover anymore
   var mouseleave = function(d) {
@@ -153,6 +178,13 @@ console.log(data)
       .style("opacity",0.8)
     }
  
+var subgroups = data.columns.slice(1)
+  var xSubgroup = d3.scaleBand()
+    .domain(subgroups)
+    .range([0, x0.bandwidth()])
+    .padding([0.05])
+
+
 if (chart_type == 'grouped'){ 
 
   svg.append("g")
@@ -165,25 +197,18 @@ if (chart_type == 'grouped'){
       .style("text-anchor", "end")
       .text("");
 
-var subgroups = data.columns.slice(1)
-  var xSubgroup = d3.scaleBand()
-    .domain(subgroups)
-    .range([0, x0.bandwidth()])
-    .padding([0.05])
-
-
   var grouped_barchart = svg.selectAll(".grouped_barchart")
     .data(data)
     .enter().append("g")
 //  .attr("class", "g")
 	      .attr("transform", function(d) { return "translate(" + x0(d.year) + ",0)"; })
 	.selectAll("rect")
-	.data(function(d){ return subgroups.map(function(key){return {key:key, value: d[key]};});})
-   //   .data(function(d) { return d.columnDetails; })
+.data(function(d){ return subgroups.map(function(key){return {key:key, value: d[key]};});})   
+//   .data(function(d) { return d.columnDetails; })
     .enter().append("rect")
- .attr("class", function(d,i){return "myRect " + d.key}) // Add a class to each subgroup: their nam
+ .attr("class", function(d,i){return "myRect " + d.key + d.value}) // Add a class to each subgroup: their nam
 
-console.log(grouped_barchart)
+//console.log(grouped_barchart)
 
 	grouped_barchart.attr("y", 500)
     .transition()
@@ -205,6 +230,11 @@ console.log(grouped_barchart)
 
 
 grouped_barchart.on("mouseover", mouseover)
+	.on('before:mousemove', function (coordinates) {
+    var target = instance.root.node().parentNode;
+	console.log(target)
+    scaleX = target.offsetWidth  / target.getBoundingClientRect().width;
+    scaleY = target.offsetHeight  / target.getBoundingClientRect().height;})
       .on("mouseleave", mouseleave)
 
 //	grouped_barchart.selectAll("rect").exit().transition().duration(1000).attr("height",0).remove()
@@ -227,12 +257,13 @@ else{
     // Enter in the stack data = loop key per key = group per group
     .data(stackedData)
     .enter().append("g")
-	.attr("class", function(d){ return "myRect " + d.key }) // Add a class to each subgroup: their name
 .attr("fill", function(d) { return color(d.key); })
       .selectAll(".stacked_barchart")
   // enter a second time = loop subgroup per subgroup to add all rectangles
       .data(function(d) { return d})
-	 .enter().append("rect");
+	 .enter().append("rect")
+//	.attr("class", function(d){console.log(d.data.columnDetails.name)}); 
+//	.attr("class", function(d){ return "myRect " + d[1]}) // Add a class to each subgroup: their name
 
 stacked_barchart
 	.attr("y", 500)
@@ -246,6 +277,7 @@ stacked_barchart
 	
 	stacked_barchart
 	.on("mouseover", mouseover)
+	.on("mousemove", mousemove)
       .on("mouseleave", mouseleave)
 }   
 
