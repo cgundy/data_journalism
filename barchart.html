@@ -208,15 +208,12 @@ if (chart_type == 'grouped'){
     .enter().append("rect")
  .attr("class", function(d,i){return "myRect " + d.key + d.value}) // Add a class to each subgroup: their nam
 
-//console.log(grouped_barchart)
+//console.log("hello")
 
 	grouped_barchart.attr("y", 500)
     .transition()
-//	.delay(function(d,i){return d.yEnd * 10})
+	.delay(function(d,i){return d.value * 10})
 	      .attr("width", x1.bandwidth())
-   //   .attr("x", function(d) { 
-   //     return x1(d.column);
-   //      })
 	.attr("x", function(d) { return xSubgroup(d.key); })
       .attr("y", function(d) { 
         return y(d.value); 

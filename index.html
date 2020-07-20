@@ -18,15 +18,17 @@
 <input type="radio", onclick="showPages(2)" id="button2" name="viz_selection" value="button2">
 <label for="button2">2</label>
 <input type="radio", onclick="showPages(3)" id="button3" name="viz_selection" value="button3">
-<label for="button3">3</label><br>
+<label for="button3">3</label>
+<input type="radio", onclick="showPages(4)" id="button4" name="viz_selection" value="button4">
+<label for="button4">4</label><br>
 
 <div id="page1" style="display: none;">
   <p>This is a narrative visualization evaluating movies based bechdel test.</p>
 </div>
 
 <iframe style="width: 100%; height: 1100px; display: none;" src="piechart.html"; id="page2"></iframe>
-
 <iframe style="width: 100%; height: 1100px; display: none;" src="barchart.html"; id="page3"></iframe>
+<iframe style="width: 100%; height: 1100px; display: none;" src="bubblechart.html"; id="page4"></iframe>
 
 <script>
   function showPages(id){
