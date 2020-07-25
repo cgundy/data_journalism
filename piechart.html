@@ -24,14 +24,14 @@ var width = 600
 var radius = Math.min(width, height) / 2 - margin
 
 // append the svg object to the div called 'piechart'
-var svg = d3.select("#piechart")
+var svg = d3.select("body")
   .append("svg")
     .attr("width", width)
     .attr("height", height)
   .append("g")
     .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-// Create dummy data
+// Create the data
 var data1 = [{name: 'Pass', count:803, percentage: 45, color:'#b3cde3'},
 			{name: 'Fail', count: 991, percentage: 55, color: '#fbb4ae'}]
 var data2 = [{name: 'Pass', count:803, percentage: 45, color: '#b3cde3'},
@@ -40,11 +40,14 @@ var data2 = [{name: 'Pass', count:803, percentage: 45, color: '#b3cde3'},
 			{name: 'No Talk', count: 514, percentage: 29, color: '#fed9a6'},
 			{name: 'No Women', count: 141, percentage: 8, color:'#fddaec'}]
 
-// A function that create / update the plot for a given variable:
+// A function that creates / updates the plot depending on the selection
 function update(data) {
 
+	// remove previous plots before loading new one
 	svg.selectAll("text").remove()
 	svg.selectAll("circle").remove()
+	svg.selectAll("path").remove()
+	d3.selectAll("g.tooltip").remove()
 
 	// Compute the position of each group on the pie:
 	var pie = d3.pie()
@@ -55,13 +58,50 @@ function update(data) {
 	var arcGenerator = d3.arc()
 	  .innerRadius(0)
 	  .outerRadius(radius)
-	
-	var u = svg.selectAll("path")
-      .data(data_ready)
 
-// Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
-	  u.enter()
+	  // -1- Create a tooltip div that is hidden by default:
+	  var tooltip = d3.select("body")
+		.append("g")
+		.attr("class", "tooltip")
+		.style("background-color", "white")
+		.style("border", "solid")
+		.style("border-width", "1px")
+		.style("left", "70px")
+		.style("top", "40px")
+		.style("position", "absolute")
+		.style("width", "100px")
+		.style("border-radius", "5px")
+		.style("padding", "10px")
+
+  // -2- Create 3 functions to show / update (when mouse move but stay on same circle) / hide the tooltip
+  var showTooltip = function(d) {
+    tooltip
+      .transition()
+      .duration(200)
+    tooltip
+      .style("opacity", 1)
+      .html("<b>Name:</b> " + d.data.name + "<br>" + "<b> Count: </b>" + d.data.count + "<br>" )
+      .style("left", (d3.mouse(this)[0]+150) + "px")
+      .style("top", (d3.mouse(this)[1]+150) + "px")
+  }
+  var moveTooltip = function(d) {
+    tooltip
+    .style("left", (d3.mouse(this)[0]+150) + "px")
+    .style("top", (d3.mouse(this)[1]+150) + "px")
+  }
+  var hideTooltip = function(d) {
+    tooltip
+      .transition()
+      .duration(200)
+      .style("opacity", 0)
+  }
+
+  var u = svg.selectAll("path")
+      .data(data_ready).enter()
 	  .append('path')
+
+// Build the pie chart. Each part of the pie is a path that we build using the arc function.
+	u	
 	  .merge(u)
       .transition()
       .duration(1000)
@@ -71,6 +111,29 @@ function update(data) {
 	  .style("stroke-width", "2px")
 	  .style("opacity", 1)
 
+u
+	.on("mouseover", showTooltip )
+	.on("mousemove", moveTooltip )
+	.on("mouseleave", hideTooltip )
+
+	// remove the group that is not present anymore
+	//	u.exit().remove();
+
+// Now add the annotation. Use the centroid method to get the best coordinates
+var v = svg.selectAll('mySlices')
+	  .data(data_ready)
+	.enter()
+	  .append('text')
+	  .transition()
+      .duration(1000)
+	  .text(function(d){ return d.data.percentage + '%'})
+	  .attr("transform", function(d) { return "translate(" + arcGenerator.centroid(d) + ")";  })
+	  .style("text-anchor", "middle")
+	  .style("font-size", 17)
+
+  
+
+  // create a legend
   svg.selectAll("mydots")
   .data(data_ready)
   .enter()
@@ -80,44 +143,18 @@ function update(data) {
     .attr("r", 7)
     .style("fill", function(d){ return d.data.color})
 
-// Add one dot in the legend for each name.
-v = svg.selectAll("mylabels")
-  .data(data_ready)
+// Add text to the legend
+legend = svg.selectAll("mylabels")
+  .data(data_ready);
+legend
   .enter()
   .append("text").transition().duration(1000)
     .attr("x", -260)
     .attr("y", function(d,i){ return 100 + i*25}) // 100 is where the first dot appears. 25 is the distance between dots
- //   .style("fill", function(d){ return color(d.data.key)})
     .text(function(d){ return d.data.name})
     .attr("text-anchor", "left")
     .style("alignment-baseline", "middle")
 
-//d3.select("#piechart").selectAll("text").exit().remove()
-
-// Now add the annotation. Use the centroid method to get the best coordinates
-	var v = svg.selectAll('mySlices')
-	  .data(data_ready);
-	v.enter()
-	  .append('text')
-	  .transition()
-      .duration(1000)
-	  .text(function(d){ return d.data.percentage + '%'})
-	  .attr("transform", function(d) { return "translate(" + arcGenerator.centroid(d) + ")";  })
-	  .style("text-anchor", "middle")
-	  .style("font-size", 17)
-
-    // remove the group that is not present anymore
-     u.exit().remove();
-//	  svg.selectAll("mylabels").exit().remove();
-//	svg.selectAll("mydots").exit().remove();
-//	 v
-//    .exit().remove();
-
-//svg.selectAll("*").remove();
-//	svg.selectAll('mySlices').exit().remove();
-
 }
-
-update(data1)
 
 </script>
