@@ -74,8 +74,9 @@ function update(data) {
 		.style("width", "100px")
 		.style("border-radius", "5px")
 		.style("padding", "10px")
+    .style("opacity", 0)
 
-  // -2- Create 3 functions to show / update (when mouse move but stay on same circle) / hide the tooltip
+  // Create functions to show / update (when mouse move but stay on same circle) / hide the tooltip
   var showTooltip = function(d) {
     tooltip
       .transition()
@@ -132,8 +133,6 @@ var v = svg.selectAll('mySlices')
 	  .attr("transform", function(d) { return "translate(" + arcGenerator.centroid(d) + ")";  })
 	  .style("text-anchor", "middle")
 	  .style("font-size", 17)
-
-  
 
   // create a legend
   svg.selectAll("mydots")

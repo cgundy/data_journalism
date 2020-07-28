@@ -84,7 +84,7 @@ d3.csv("data/bubblechart.csv", function(data) {
       .extent([ [0,0], [width,height] ]) // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
       .on("end", updateChart) // Each time the brush selection changes, trigger the 'updateChart' function
 
-  // -1- Create a tooltip div that is hidden by default:
+  // Create a tooltip div that is hidden by default:
   var tooltip = 
 	d3.select("body")
     .append("g")
@@ -98,10 +98,11 @@ d3.csv("data/bubblechart.csv", function(data) {
     .style("width", "100px")
     .style("border-radius", "5px")
     .style("padding", "10px")
+    .style("opacity", 0)
 
   var f = d3.format(".4s");
 
-  // -2- Create 3 functions to show / update (when mouse move but stay on same circle) / hide the tooltip
+  // Create functions to show / update (when mouse move but stay on same circle) / hide the tooltip
   var showTooltip = function(d) {
     tooltip
       .transition()

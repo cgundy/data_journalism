@@ -82,6 +82,7 @@ var innerColumns = {
 // A function that creates / updates the plot depending on the selection
 function update(chart_type){
 
+// remove previous elements on chart switch
 svg.selectAll('rect').remove()
 svg.selectAll('tspan').remove()
 svg.selectAll('g.y.axis').remove()
@@ -89,7 +90,7 @@ svg.selectAll('g.x.axis').remove()
 d3.selectAll('g.tooltip').remove()
 d3.selectAll('circle').remove()
 
-
+// create annotations
 text = svg.append('text')
 .attr("y", 100)
 .attr("x", 100)
@@ -139,29 +140,29 @@ d3.csv("data/barchart.csv").then(
     });
   });
 
+// create stacked data
  var stackedData = d3.stack()
     .keys(['pass','fail'])
     (data);
 
+// assign data domains
   x0.domain(data.map(function(d) { return d.year; }));
   x1.domain(d3.keys(innerColumns)).range([0, x0.bandwidth()]).padding([0.05]);
  
   y.domain([0, d3.max(data, function(d) { 
-    return d.total; 
-  })]);
-
+    return d.total; })]);
   y1.domain([0,160]);
  
   // create labels for x axis
   svg.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height + ")")
 	.call(xAxis)
     .selectAll("text")
-  .attr("y", -4)
-        .attr("transform", "rotate(-90)")
-  .attr("dx", "-0.8em")
-  .style("text-anchor", "end");
+    .attr("y", -4)
+    .attr("transform", "rotate(-90)")
+    .attr("dx", "-0.8em")
+    .style("text-anchor", "end");
 
   // create subgroups for grouped barchart
   var subgroups = data.columns.slice(1)
@@ -184,6 +185,7 @@ var tooltip = d3.select("body")
     .style("width", "40px")
     .style("border-radius", "5px")
     .style("padding", "10px")
+    .style("opacity", 0)
 
   // What happens when the user hovers over a bar
   var mouseover = function(d) {
@@ -200,8 +202,8 @@ var tooltip = d3.select("body")
     // Highlight all rects of this subgroup with opacity 0.8. It is possible to select them since they have a specific class = their name.
     d3.selectAll("."+subgroupName + subgroupValue).style("opacity", 1)
     tooltip
-        .html(subgroupName + "<br>" + "Count: " + subgroupValue)
-        .style("opacity", 1)
+      .html(subgroupName + "<br>" + "Count: " + subgroupValue)
+      .style("opacity", 1)
   }
 
   // When user moves over a bar
@@ -264,6 +266,7 @@ grouped_barchart.on("mouseover", mouseover)
     scaleY = target.offsetHeight  / target.getBoundingClientRect().height;})
   .on("mouseleave", mouseleave)
 
+// add annotation
   text = svg.append('text')
     .attr("y", 120)
     .attr("x", 700)
