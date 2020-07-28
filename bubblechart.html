@@ -37,7 +37,7 @@ var margin = {top: 20, right: 20, bottom: 30, left: 50},
 var svg = d3.select("body")
   .append("svg")
     .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
+    .attr("height", height + margin.top + 10*margin.bottom)
   .append("g")
     .attr("transform",
           "translate(" + margin.left + "," + margin.top + ")");
@@ -161,6 +161,52 @@ bubblechart
   .on("mousemove", moveTooltip )
   .on("mouseleave", hideTooltip )
 
+function updateTop(low_year, upper_year){
+
+  text = svg
+    .append("text")
+    .attr("x", 0) 
+    .attr("y", height + 2*margin.bottom)
+    .attr("text-anchor", "left")
+    .append("tspan")
+    .text("Looking at the film budgets, it becomes obvious that high-budget films are more likely to fail the Bechdel test. While this trend seems to be leveling out over") 
+    .append("tspan")
+    .attr("dy", "1em")
+    .attr("x", 0)
+    .text("time, this inequality is stil present, and most likely due to the lack of women in producer, director and writer roles in Hollywood.")
+    .append("tspan")
+    .attr("dy", "2em")
+    .attr("x", 0)
+    .text("Use the brushing tool to zoom in on certain years. Use the reset button to zoom back out.")
+
+  text
+    .append("tspan")
+    .style("font-size", "12px") 
+    .attr("dy", "2em")
+    .attr("x", 0) 
+    .style("text-decoration", "underline") 
+    .text("Top 10 Movies")
+
+  var topData = data.filter(function(d){return (d.year >= low_year & d.year <= upper_year)})
+    .sort(function(a,b) {
+    return d3.descending(+a.intgross_2013, +b.intgross_2013);
+    }).slice(0, 10);
+
+  text_with_data = text
+    .selectAll("chart")
+    .data(topData)
+    .enter()
+
+  var f = d3.format("$" + ".2s");
+
+  text_with_data
+    .append("tspan")
+    .attr("dy", "1em")
+    .attr("x", 0)
+    .style("fill", function(d) {return myColor(d.binary)})
+    .text(function(d){return f(d.intgross_2013) + " " + d.title})
+
+}
   // A function that updates the chart for given boundaries
   function updateChart() {
 
@@ -185,7 +231,21 @@ bubblechart
 
     }
 
+    updateTop(1970, 2010)
+
   })
+
+var button = d3.button()
+  .on('press', function(d, i) {updateTop(lyear, uyear)})
+
+// Add buttons
+var buttons = svg.selectAll('.button')
+    .data(data)
+  .enter()
+    .append('g')
+    .attr('class', 'button')
+    .call(button);
+
 </script>
 
-<button onClick="window.location.reload();">Reset</button>
+<button style="float:left" onClick="window.location.reload();">Reset</button>

@@ -7,11 +7,15 @@
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 
 <!-- Add 2 buttons -->
-<button onclick="update(data1)">Total</button>
-<button onclick="update(data2)">By Category</button>
+<button style="float:left" onclick="update(data1)">Total</button>
+<button style="float:left" onclick="update(data2)">By Category</button>
 
 <!-- Create a div where the graph will take place -->
-<div id="piechart"></div>
+<div id="piechart" style="width:50%; float:left"></div></div>
+<div id="description" style="width:30%; float:left"> <p>At a very high level, we can see that of this collection of films, more than half fail the Bechdel test. Drilling down further into the types of classification, the highest number of movies fail the test because the women - although present - don't speak to each other. <br> 
+<br>
+Hover over the fields to get more info.
+</p></div>
 
 <script>
 
@@ -24,7 +28,7 @@ var width = 600
 var radius = Math.min(width, height) / 2 - margin
 
 // append the svg object to the div called 'piechart'
-var svg = d3.select("body")
+var svg = d3.select("#piechart")
   .append("svg")
     .attr("width", width)
     .attr("height", height)
@@ -60,14 +64,12 @@ function update(data) {
 	  .outerRadius(radius)
 
 	  // -1- Create a tooltip div that is hidden by default:
-	  var tooltip = d3.select("body")
+	var tooltip = d3.select("#piechart")
 		.append("g")
 		.attr("class", "tooltip")
 		.style("background-color", "white")
 		.style("border", "solid")
 		.style("border-width", "1px")
-		.style("left", "70px")
-		.style("top", "40px")
 		.style("position", "absolute")
 		.style("width", "100px")
 		.style("border-radius", "5px")
@@ -81,13 +83,13 @@ function update(data) {
     tooltip
       .style("opacity", 1)
       .html("<b>Name:</b> " + d.data.name + "<br>" + "<b> Count: </b>" + d.data.count + "<br>" )
-      .style("left", (d3.mouse(this)[0]+150) + "px")
-      .style("top", (d3.mouse(this)[1]+150) + "px")
+      .style("left", (d3.mouse(this)[0]+300) + "px")
+      .style("top", (d3.mouse(this)[1]+300) + "px")
   }
   var moveTooltip = function(d) {
     tooltip
-    .style("left", (d3.mouse(this)[0]+150) + "px")
-    .style("top", (d3.mouse(this)[1]+150) + "px")
+    .style("left", (d3.mouse(this)[0]+300) + "px")
+    .style("top", (d3.mouse(this)[1]+300) + "px")
   }
   var hideTooltip = function(d) {
     tooltip
@@ -158,3 +160,4 @@ legend
 }
 
 </script>
+
