@@ -88,7 +88,7 @@ svg.selectAll('tspan').remove()
 svg.selectAll('g.y.axis').remove()
 svg.selectAll('g.x.axis').remove()
 d3.selectAll('g.tooltip').remove()
-d3.selectAll('circle').remove()
+d3.selectAll('circle.annotation').remove()
 
 // create annotations
 text = svg.append('text')
@@ -280,6 +280,7 @@ grouped_barchart.on("mouseover", mouseover)
     .text('significantly more movies passed.')
 
   circle = svg.append('circle')
+    .attr("class", "annotation")
     .attr('cx', 731)
     .attr('cy', 152)
     .attr('r', 10)
